@@ -6,12 +6,17 @@
 %write what airfoil you want here
 afnum = 0010;
 %scale by your chord length
-foilpoints = naca4gen(afnum)*1;
+foilpoints = trimte(naca4gen(afnum))*1;
+%if you need to trim the TE you can do it here, or at the export
+%just pass in your variable through trimte
+%like so 
+%foilpoints = trimte(naca4gen(afnum))
+%foilpoints = trimte(foilpoints);
 
 
 %Five series reflex example 
 % afnum = 24110;
-% foilpoints = generatefiveseries(afnum);
+% foilpoints = trimte(generatefiveseries(afnum));
 %biconvex example
 %afnum = "bi105percent";
 %foilpoints = generatebiconvex(afnum);
@@ -21,8 +26,8 @@ foilpoints = naca4gen(afnum)*1;
 % foilpoints = clarky()*304.8;
 
 
- %afnum = "sd7080";
- %foilpoints = sd7080();
+ % afnum = "sd7080";
+ % foilpoints = trimte(sd7080());
 
 %afnum = "e63";
 %foilpoints = e63();
@@ -208,7 +213,7 @@ function [outvec] = printsolidworksfile(pointsvec,airfoilname)
     end
     %lower
     for i = 2:numpts
-        fprintf(fid,"%f,%f,0\n",pointsvec(i,3),pointsvec(i,4));
+        fprintf(fid,"%f,0,%f\n",pointsvec(i,3),pointsvec(i,4));
     end
     outvec = fclose(fid);
 end
@@ -479,7 +484,9 @@ function [outvec] = e63()
   size(bottom);
  outvec = [top,bottom];
 end
-
-
-
+function [outpoints] = trimte(foilpoints)
+%removes last point pair of TE
+%run multiple times to get a thicker TE
+outpoints = foilpoints(1:end-1,:);
+end
 
