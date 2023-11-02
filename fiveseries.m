@@ -4,7 +4,7 @@
 %email cghiugan@iastate.edu for help
 
 %write what airfoil you want here
-afnum = 0010;
+afnum = 0012;
 %scale by your chord length
 foilpoints = trimte(naca4gen(afnum))*1;
 %if you need to trim the TE you can do it here, or at the export
@@ -15,8 +15,8 @@ foilpoints = trimte(naca4gen(afnum))*1;
 
 
 %Five series reflex example 
-% afnum = 24110;
-% foilpoints = trimte(generatefiveseries(afnum));
+afnum = 24110;
+foilpoints = trimte(generatefiveseries(afnum));
 %biconvex example
 %afnum = "bi105percent";
 %foilpoints = generatebiconvex(afnum);
@@ -26,8 +26,8 @@ foilpoints = trimte(naca4gen(afnum))*1;
 % foilpoints = clarky()*304.8;
 
 
- % afnum = "sd7080";
- % foilpoints = trimte(sd7080());
+ afnum = "sd7080";
+ foilpoints = trimte(sd7080());
 
 %afnum = "e63";
 %foilpoints = e63();
@@ -209,7 +209,7 @@ function [outvec] = printsolidworksfile(pointsvec,airfoilname)
     %fprintf(fid,sprintf("NACA %s Airfoil\n",airfoilname));
     %upper
     for i = numpts:-1:1
-        fprintf(fid,"%f,%f,0\n",pointsvec(i,1),pointsvec(i,2));
+        fprintf(fid,"%f,0,%f\n",pointsvec(i,1),pointsvec(i,2));
     end
     %lower
     for i = 2:numpts
