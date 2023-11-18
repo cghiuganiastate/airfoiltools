@@ -14,6 +14,7 @@ foilpoints = trimte(naca4gen(afnum))*1;
 %foilpoints = trimte(foilpoints);
 
 
+
 %Five series reflex example 
 afnum = 24110;
 foilpoints = trimte(generatefiveseries(afnum));
@@ -28,15 +29,131 @@ foilpoints = trimte(generatefiveseries(afnum));
 
  afnum = "sd7080";
  foilpoints = trimte(sd7080());
-
+ 
+ afnum = "65030";
+ foilpoints = rotateaf(scaletc(trimte(generate65020()),3/2),-10);
+ plot(foilpoints(:,1),foilpoints(:,2),foilpoints(:,3),foilpoints(:,4))
+ axis equal
 %afnum = "e63";
 %foilpoints = e63();
 
 %call your printing routine here
 %printaffile(foilpoints,num2str(afnum));
 %printdatfile(foilpoints,num2str(afnum));
-printsolidworksfile(foilpoints,num2str(afnum));
+printsolidworksfile(foilpoints,num2str(afnum),0,0,0);
 
+%lets make an airplane
+aircraftname = "design1mk8curves";
+mkdir(aircraftname);
+cd(aircraftname);
+wingle = 7;
+wchord = 14;
+wsspanstraight = 21+6;
+wsspancrank = 21;
+wcrankdih = 10;
+wsspandih = wsspanstraight+wsspancrank;
+wdih = 5;
+wingup = 1;
+wingia = 3;
+taille = 54;
+tchord = 9;
+tailia = 0;
+taildih = 35;
+tailspan = 12;
+tailafnum = 0012;
+tailup = 0;%-.25;
+
+afname = "wingroot";
+x = wingle;
+y = 0;
+z = wingup;
+chord = wchord;
+foilpoints = rotateaf(trimte(trimte(trimte(sd7080()))),wingia)*chord;
+printsolidworksfile(foilpoints,afname,x,y,z);
+%parts for crank dihedral
+afname = "wingmid";
+x = wingle;
+y = wsspanstraight;
+z = wingup;
+chord = wchord;
+foilpoints = rotateaf(trimte(trimte(trimte(sd7080()))),wingia)*chord;
+printsolidworksfile(foilpoints,afname,x,y,z);
+afname = "wingmidleft";
+x = wingle;
+y = wsspanstraight;
+z = wingup;
+chord = wchord;
+foilpoints = rotateaf(trimte(trimte(trimte(sd7080()))),wingia)*chord;
+printsolidworksfile(foilpoints,afname,x,-y,z);
+afname = "wingtip";
+x = wingle;
+y = wsspanstraight+wsspancrank;
+z = wingup+sind(wcrankdih)*wsspancrank;
+chord = wchord;
+foilpoints = rotateaf(trimte(trimte(trimte(sd7080()))),wingia)*chord;
+printsolidworksfile(foilpoints,afname,x,y,z);
+afname = "wingtipleft";
+x = wingle;
+y = wsspanstraight+wsspancrank;
+z = wingup+sind(wcrankdih)*wsspancrank;
+chord = wchord;
+foilpoints = rotateaf(trimte(trimte(trimte(sd7080()))),wingia)*chord;
+printsolidworksfile(foilpoints,afname,x,-y,z);
+
+% %parts for simple dihedral
+% afname = "wingdihtip";
+% x = wingle;
+% y = wsspandih;
+% z = wingup+sind(wdih)*wsspandih;
+% chord = wchord;
+% foilpoints = trimte(trimte(trimte(sd7080()*chord)));
+% printsolidworksfile(foilpoints,afname,x,y,z);
+% afname = "wingdihtipleft";
+% x = wingle;
+% y = wsspandih;
+% z = wingup+sind(wdih)*wsspandih;
+% chord = wchord;
+% foilpoints = trimte(trimte(trimte(sd7080()*chord)));
+% printsolidworksfile(foilpoints,afname,x,-y,z);
+
+%parts for tail
+afname = "tailroot";
+x = taille;
+y = 0;
+z = tailup;
+chord = tchord;
+foilpoints = rotateaf(trimte(trimte(trimte(trimte(naca4gen(tailafnum))))),tailia)*chord;
+printsolidworksfile(foilpoints,afname,x,y,z);
+afname = "tailtip";
+x = taille;
+y = tailspan*cosd(taildih);
+z = tailup+tailspan*sind(taildih);
+chord = tchord;
+foilpoints = rotateaf(trimte(trimte(trimte(trimte(naca4gen(tailafnum))))),tailia)*chord;
+printsolidworksfile(foilpoints,afname,x,y,z);
+afname = "tailtipleft";
+x = taille;
+y = tailspan*cosd(taildih);
+z = tailup+tailspan*sind(taildih);
+chord = tchord;
+foilpoints = rotateaf(trimte(trimte(trimte(trimte(naca4gen(tailafnum))))),tailia)*chord;
+printsolidworksfile(foilpoints,afname,x,-y,z);
+%swtailspar(.57,6,0,54+5+1-6)
+cd("..") %dont forget to change back
+
+% afname = "fuselage";
+% x = 0;
+% y = 0;
+% z = 0;
+% chord = 24;
+% foilpoints = scaletc(trimte(generate65020()),3/2)*chord;
+% afname = "fuselage2";
+% x = 0;
+% y = 0;
+% z = 0;
+% chord = 36;
+% foilpoints = scaletc(trimte(generate65020()),2/2)*chord;
+% printswupper(foilpoints,afname,x,y,z);
 
 % for afnum = 24104:24120
 %     foilpoints = generatefiveseries(afnum);
@@ -202,19 +319,34 @@ function [outvec] = printdatfile(pointsvec,airfoilname)
     end
     outvec = fclose(fid);
 end
-function [outvec] = printsolidworksfile(pointsvec,airfoilname)
+function [outvec] = printsolidworksfile(pointsvec,airfoilname,x,y,z)
+    fid = fopen(sprintf("%s.sldcrv",airfoilname),"w");
+    numpts = size(pointsvec);
+    numpts = numpts(1);
+    %fprintf(fid,sprintf("NACA %s Airfoil\n",airfoilname));
+    %upper
+    for i = numpts:-1:1
+        fprintf(fid,"%fin %fin  %fin\n",pointsvec(i,1)+x,y,pointsvec(i,2)+z);
+    end
+    %lower
+    for i = 2:numpts
+        fprintf(fid,"%fin %fin  %fin\n",pointsvec(i,3)+x,y,pointsvec(i,4)+z);
+    end
+    outvec = fclose(fid);
+end
+function [outvec] = printswupper(pointsvec,airfoilname,x,y,z)
     fid = fopen(sprintf("%s.txt",airfoilname),"w");
     numpts = size(pointsvec);
     numpts = numpts(1);
     %fprintf(fid,sprintf("NACA %s Airfoil\n",airfoilname));
     %upper
     for i = numpts:-1:1
-        fprintf(fid,"%f,0,%f\n",pointsvec(i,1),pointsvec(i,2));
+        fprintf(fid,"%f,%f,%f\n",pointsvec(i,1)+x,y,pointsvec(i,2)+z);
     end
     %lower
-    for i = 2:numpts
-        fprintf(fid,"%f,0,%f\n",pointsvec(i,3),pointsvec(i,4));
-    end
+    % for i = 2:numpts
+    %     fprintf(fid,"%f,%f,%f\n",pointsvec(i,3),y,pointsvec(i,4));
+    % end
     outvec = fclose(fid);
 end
 
@@ -484,9 +616,104 @@ function [outvec] = e63()
   size(bottom);
  outvec = [top,bottom];
 end
+function [outvec] = generate65020()
+  top = flip([1.000000  0.000000
+  0.950000  0.007170
+  0.900000  0.019240
+  0.850000  0.033240
+  0.800000  0.047960
+  0.750000  0.062510
+  0.700000  0.076100
+  0.650000  0.087930
+  0.600000  0.096920
+  0.550000  0.101860
+  0.500000  0.104340
+  0.450000  0.105000
+  0.400000  0.104070
+  0.350000  0.101540
+  0.300000  0.097380
+  0.250000  0.091530
+  0.200000  0.083760
+  0.150000  0.073690
+  0.100000  0.060520
+  0.075000  0.052330
+  0.050000  0.042690
+  0.025000  0.030450
+  0.012500  0.022400
+  0.007500  0.018040
+  0.005000  0.015250
+  0.000000  0.003000]);
+
+  bottom = [0.000000  0.003000
+  0.005000 -0.015250
+  0.007500 -0.018040
+  0.012500 -0.022400
+  0.025000 -0.030450
+  0.050000 -0.042690
+  0.075000 -0.052330
+  0.100000 -0.060520
+  0.150000 -0.073690
+  0.200000 -0.083760
+  0.250000 -0.091530
+  0.300000 -0.097380
+  0.350000 -0.101540
+  0.400000 -0.104070
+  0.450000 -0.105000
+  0.500000 -0.104340
+  0.550000 -0.101860
+  0.600000 -0.096920
+  0.650000 -0.087930
+  0.700000 -0.076100
+  0.750000 -0.062510
+  0.800000 -0.047960
+  0.850000 -0.033240
+  0.900000 -0.019240
+  0.950000 -0.007170
+  1.000000  0.000000];
+  % size(top)
+  % size(bottom)
+  outvec = [top,bottom];
+end
+
 function [outpoints] = trimte(foilpoints)
 %removes last point pair of TE
 %run multiple times to get a thicker TE
 outpoints = foilpoints(1:end-1,:);
 end
 
+function [outpoints] = scaletc(foilpoints,scalefactor)
+outpoints = [foilpoints(:,1),foilpoints(:,2)*scalefactor,foilpoints(:,3),foilpoints(:,4)*scalefactor];
+end
+function [outpoints] = rotateaf(foilpoints,t)
+t = -t; %sign convention
+r = [cosd(t) -sind(t); sind(t) cosd(t)];
+xt = foilpoints(:,1)';
+yt = foilpoints(:,2)';
+xb = foilpoints(:,3)';
+yb = foilpoints(:,4)';
+t = r*[xt;yt];
+b = r*[xb;yb];
+outpoints = [t',b'];
+end
+function plotairfoil3d(foilpoints)
+plot3(foilpoints)
+end
+
+function [outvec] = swtailspar(diam,x,z,length)
+n = 48;
+r = diam/2;
+t = 0:2*pi/n:2*pi;
+y = cos(t)*r;
+z = sin(t)*r+z;
+fid = fopen(sprintf("tubestart.txt"),"w");
+    numpts = n;
+    for i = 1:numpts
+        fprintf(fid,"%f,%f,%f\n",x,y,z);
+    end
+    outvec(1,:) = fclose(fid);
+    fid = fopen(sprintf("tubeend.txt"),"w");
+    for i = 1:numpts
+        fprintf(fid,"%f,%f,%f\n",x+length,y,z);
+    end
+    outvec(2,:) = fclose(fid);
+end
