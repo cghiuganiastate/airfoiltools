@@ -41,7 +41,15 @@ foilpoints = trimte(generatefiveseries(afnum));
 %printaffile(foilpoints,num2str(afnum));
 %printdatfile(foilpoints,num2str(afnum));
 printsolidworksfile(foilpoints,num2str(afnum),0,0,0);
-
+%personal project, exporting boeing 737 tail airfoils for use in openVSP/XFLR5
+printdatfile(bac737ht('a'),"boeing_737a_ht");
+printdatfile(bac737ht('b'),"boeing_737b_ht");
+printdatfile(bac737ht('c'),"boeing_737c_ht");
+printdatfile(bac737vt('a'),"boeing_737a_vt");
+printdatfile(bac737vt('b'),"boeing_737b_vt");
+printdatfile(bac737vt('c'),"boeing_737c_vt");
+printdatfile(bac737vt('d'),"boeing_737d_vt");
+printdatfile(bac737vt('e'),"boeing_737e_vt");
 %lets make an airplane
 aircraftname = "design1mk8curves";
 mkdir(aircraftname);
@@ -54,10 +62,10 @@ wcrankdih = 10;
 wsspandih = wsspanstraight+wsspancrank;
 wdih = 5;
 wingup = 1;
-wingia = 3;
+wingia = 1.25;
 taille = 54;
 tchord = 9;
-tailia = 0;
+tailia = -1.75;
 taildih = 35;
 tailspan = 12;
 tailafnum = 0012;
@@ -674,7 +682,72 @@ function [outvec] = generate65020()
   % size(bottom)
   outvec = [top,bottom];
 end
-
+%btw spans for boeing 737a/b/c/d are as follows:
+%6.06340  ft for inside fuselage
+%3.11370 sect1
+%4.91630 sect2
+%3.76917 sect3
+%rest is sect4
+function [outpoints] = bac737ht(inputstr)
+xc = [0 .005 .0075 .0125 .025 .05 .075 .1 .15 .2 .25 .3 .35 .4 .5 .6 .7 .9 1]';
+%at body center location
+zua = [0 .093 .0118 .0156 .0209 .0251 .0270 .0286 .0321 .0355 .0391 .0424 .0448 .0464 .0447 .0363 .0268 .0089 .0005]';
+zla = -1*[.014 .023 .026 .0306 .0387 .0489 .0564 .0619 .0697 .0753 .0796 .0827 .0846 .0854 .0822 .0694 .0537 .0177 .0005]';
+%at 21% semispan
+zub = [0 .0085 .0111 .0143 .0182 .0208 .0222 .0238 .0267 .0296 .0324 .0353 .0375 .0389 .0379 .0334 .0246 .0082 .0006]';
+zlb = -1*[.0114 .0197 .0223 .0267 .0347 .0448 .0516 .0567 .0639 .0687 .0726 .0756 .0774 .0779 .0751 .0668 .0539 .0178 .0006]';
+%at 46% semispan to end
+zuc = [0 .0080 .01 .0128 .0164 .0186 .02 .0213 .0237 .0264 .0288 .0313 .0333 .0344 .0349 .0323 .0235 .0078 .001]';
+zlc = -1*[.0104 .0184 .0213 .0254 .0324 .0422 .0485 .0534 .0603 .0650 .0685 .0711 .0727 .0732 .0716 .0652 .0538 .0176 .001]';
+switch inputstr
+    case 'a'
+        zu = zua;
+        zl = zla;
+    case 'b'
+        zu = zub;
+        zl = zlb;
+    case 'c'
+        zu = zuc;
+        zl = zlc;
+end
+% size(xc)
+% size(zua)
+top = [xc,zu];
+bottom = [xc,zl];
+outpoints= [top,bottom];
+end
+function [outpoints] = bac737vt(inputstr)
+basexc = [0 .0017 .0034 .005 .0084 .0167 .0334 .0501 .0668 .1002 .1336 .1670 .2004 .2338 .2672 .2859 .6114  .6326 .6660 .6994 .7328 .7662 .7996 .8330 1]';
+%foil @ 96.37% fuselage height (tail begins here)
+basez = [0 .0051 .0069 .0083 .0104 .0139 .0190 .0223 .0270 .0325 .0366 .0397 .0419 .0433 .0440 .0441 .0441 .0437 .0415 .0383 .0346 .0306 .0263 .0220 .0003]';
+xc = [0 .0025 .005 .0075 .01 .0125 .025 .05 .075 .1 .15 .2 .25 .3 .35 .4 .425 .45 .5 .55 .6 .65 .7 .75 1]';
+%foil @ 9.76% tail height
+zc1 = [0 .0067 .0092 .0109 .0124 .0136 .0184 .0253 .0311 .0358 .0428 .0480 .0515 .0539 .0551 .0554 .0554 .0554 .0552 .0532 .0496 .0449 .0393 .0329 .0004]';
+%foil @ 18.55% tail height
+zc2 = [0 .0066 .009 .0108 .0122 .0132 .0181 .0248 .0304 .0351 .0423 .0475 .0513 .0540 .0556 .0563 .0563 .0563 .0555 .0534 .0499 .0452 .0394 .0328 .0005]';
+%foil @ 40.59% tail height
+zc3 = [0 .0060 .0083 .0099 .0112 .0126 .0173 .0237 .0285 .0328 .0396 .0448 .0486 .0514 .0530 .0539 .0539 .0539 .0531 .0516 .0490 .0450 .0394 .0328 .0005]';
+%foil @ 100% tail height
+zc4 = [0 .0060 .0083 .0099 .0112 .0126 .0173 .0237 .0285 .0328 .0396 .0448 .0486 .0514 .0530 .0539 .0539 .0539 .0531 .0516 .0490 .0450 .0394 .0328 .0013]';
+switch inputstr
+    case 'a'
+       xc = basexc;
+       z = basez;
+    case 'b'
+        z = zc1;
+    case 'c'
+        z = zc2;
+    case 'd'
+        z = zc3;
+    case 'e'
+        z = zc4;
+end
+% size(xc)
+% size(z)
+top = [xc,z];
+bottom = [xc,-z];
+outpoints = [top,bottom];
+end
 function [outpoints] = trimte(foilpoints)
 %removes last point pair of TE
 %run multiple times to get a thicker TE
