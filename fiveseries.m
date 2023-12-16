@@ -50,6 +50,8 @@ printdatfile(bac737vt('b'),"boeing_737b_vt");
 printdatfile(bac737vt('c'),"boeing_737c_vt");
 printdatfile(bac737vt('d'),"boeing_737d_vt");
 printdatfile(bac737vt('e'),"boeing_737e_vt");
+foilpoints = bac737vt('e');
+plot(foilpoints(:,1),foilpoints(:,2),foilpoints(:,3),foilpoints(:,4))
 %lets make an airplane
 aircraftname = "design1mk8curves";
 mkdir(aircraftname);
@@ -691,7 +693,7 @@ end
 function [outpoints] = bac737ht(inputstr)
 xc = [0 .005 .0075 .0125 .025 .05 .075 .1 .15 .2 .25 .3 .35 .4 .5 .6 .7 .9 1]';
 %at body center location
-zua = [0 .093 .0118 .0156 .0209 .0251 .0270 .0286 .0321 .0355 .0391 .0424 .0448 .0464 .0447 .0363 .0268 .0089 .0005]';
+zua = [0 .0093 .0118 .0156 .0209 .0251 .0270 .0286 .0321 .0355 .0391 .0424 .0448 .0464 .0447 .0363 .0268 .0089 .0005]';
 zla = -1*[.014 .023 .026 .0306 .0387 .0489 .0564 .0619 .0697 .0753 .0796 .0827 .0846 .0854 .0822 .0694 .0537 .0177 .0005]';
 %at 21% semispan
 zub = [0 .0085 .0111 .0143 .0182 .0208 .0222 .0238 .0267 .0296 .0324 .0353 .0375 .0389 .0379 .0334 .0246 .0082 .0006]';
